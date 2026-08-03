@@ -5,6 +5,16 @@
 
 各週のノートは単一の HTML ファイルで、外部通信もビルドも不要です。ブラウザで開けば動きます。
 
+**目次ページ: [`index.html`](index.html)** — 週の一覧、各ノートの進み方、教材としての方針。
+
+## 教材としての方針
+
+ブログ記事は読み物として書きますが、こちらは繰り返し戻ってくる教材として、次の 3 層で組んでいます。
+
+1. **前提から** — 手順ではなく「そもそもなぜその道具が要るのか」から書く
+2. **壊せるラボ** — 正しい完成形だけでは各行が何を買っているか分からないので、1 行外して壊す
+3. **検問クイズ** — 出題はその場で生成。判定はラボと同じ計算器が行うので、答えを覚えても意味がない
+
 ## 収録
 
 | 週 | ノート | 扱っている内容 |
@@ -23,7 +33,17 @@
 ## 読み方
 
 ```bash
-open week1/index.html    # macOS
+open index.html    # macOS。目次から各週へ
+```
+
+## 個人サイトへの配布
+
+このリポジトリを唯一の正とし、[susumutomita.github.io](https://github.com/susumutomita/susumutomita.github.io) の
+`public/notes/` へコピーして配信します。編集はこちらだけで行ってください。
+
+```bash
+bash scripts/sync-to-site.sh          # 既定: ~/product/susumutomita.github.io
+bash scripts/sync-to-site.sh <path>   # 配布先を指定する場合
 ```
 
 ## ネタバレについて
