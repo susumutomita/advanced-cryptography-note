@@ -1410,6 +1410,51 @@ on-chain のコントラクトが検証
         </div>
       </li>
       <li>
+        <h4>引き算と割り算は、新しい演算ではない</h4>
+        <div class="body">
+          <p>
+            「四則演算ができる」と「演算は 2 つ」は矛盾しません。
+            <strong>引き算と割り算は、足し算と掛け算の裏返しとして定義される</strong>からです。
+          </p>
+          <p>
+            <b>引き算は「逆元を足すこと」。</b> <code>a − b</code> の正体は <code>a + (−b)</code> で、
+            <code>−b</code> は「足すと 0 になる相手」（加法逆元）。
+            F₅ なら <code>−2 = 3</code>（2 + 3 = 5 ≡ 0）なので、
+            <code>3 − 2 = 3 + 3 = 6 ≡ 1</code>。
+          </p>
+          <p>
+            <b>割り算は「逆数を掛けること」。</b> <code>a ÷ b</code> の正体は <code>a × b⁻¹</code> で、
+            <code>b⁻¹</code> は「掛けると 1 になる相手」（乗法逆元）。
+            F₅ なら <code>2⁻¹ = 3</code>（2 × 3 = 6 ≡ 1）なので、
+            <code>3 ÷ 2 = 3 × 3 = 9 ≡ 4</code>。検算すると <code>4 × 2 = 8 ≡ 3</code> で戻ります。
+          </p>
+          <p class="why">
+            <b>体の定義そのもの:</b> 「環（加法と乗法がある）であって、0 以外のすべての元に乗法逆元がある」。
+            <b>四則のうち 2 つは、残り 2 つの逆演算として後から出てくる</b>のであって、
+            演算が 4 つあるわけではありません。Week 0 のスライドで加法逆元・乗法逆元の表を作ったのは、
+            まさにこれを確認するためでした。
+          </p>
+        </div>
+      </li>
+      <li>
+        <h4>回路では、引き算はタダ・割り算は制約 1 本に化ける</h4>
+        <div class="body">
+          <p>
+            <b>引き算はゲートを消費しません。</b> <code>a − b</code> は <code>a + (−1)·b</code> と書けて、
+            定数倍は無料だからです。今回の <code>role − 2</code> にコストがかからないのはこれが理由。
+          </p>
+          <p>
+            <b>割り算にはゲートがありません。</b> 代わりに<strong>答えを prover に主張させて、掛け算 1 回で検算します</strong>。
+            <code>y = 1/x</code> を主張させ、回路が課すのは <code>x · y − 1 = 0</code> の 1 本だけ。
+          </p>
+          <p class="why">
+            <b>おまけで 0 除算も塞がる:</b> <code>x = 0</code> のとき <code>x·y − 1 = 0</code> を満たす
+            <code>y</code> は存在しません。<b>「0 では割れない」が制約として自動的に表現される</b>わけです。
+            そして 0 に逆数を認めない理由も同じで、認めると <code>0·y = 1</code> と <code>0·y = 0</code> が衝突します。
+          </p>
+        </div>
+      </li>
+      <li>
         <h4>実例 — 指数法則を借りるだけで、加算が 1 つ手に入る</h4>
         <div class="body">
           <p>
@@ -1475,6 +1520,42 @@ on-chain のコントラクトが検証
         </div>
       </li>
     </ol>
+
+    <div class="callout">
+      <p class="eyebrow">「4 つ持てば便利では」への答え</p>
+      <p class="strong-line">
+        増やせないのではなく、<b>増やしても何も増えない</b>。そして本当に増やせるものは、増やすと壊れる。
+      </p>
+      <p>
+        <strong>① 引き算と割り算は独立していない。</strong>
+        <code>a − b = a + (−b)</code> で完全に書けるものを 4 つ目として数えても、表現力は 1 ミリも増えません。
+        数学が構造を「2 つの演算」で定義するのは、<b>独立に必要な最小の組</b>を取るからです。
+      </p>
+      <p>
+        <strong>② 本当に独立な 4 つ目（比較など）は、持てたら暗号が壊れる。</strong>
+        中身を見ずに大小が分かる道具があれば、二分探索で平文が割れます。
+        <b>増やせないのは代数の都合ではなく、安全性の要請</b>です。
+      </p>
+      <p>
+        <strong>③ 除算をゲートにすると、回路がむしろ壊れる。</strong>
+        <code>x = 0</code> のとき答えが定義できないからです。回路は「全部の等式が同時に成り立つか」を問う世界なので、
+        入力によって答えが無い関数をそのまま置けません。
+        <b>制約 <code>x·y − 1 = 0</code> に翻訳するほうが素直</b>で、0 除算も自動的に塞がります。
+      </p>
+      <p class="strong-line">
+        ④ そして決定的なのがこれ —— <b>2 つ + 「主張させて検算する」は、4 つより強い。</b>
+      </p>
+      <p>
+        逆数は <code>x·y = 1</code>、平方根は <code>y·y = x</code>、ソートは「並べ替えたものを主張させて、
+        置換であることと単調であることを検査」。<strong>どれも専用ゲートを持たずに、掛け算数本で片が付きます。</strong>
+        回路の設計思想は「演算を増やす」ではなく「<b>難しい計算は prover にやらせ、安く検算する</b>」——
+        前の節で見た「回路は計算しない、答え合わせをする」が、ここで効いてきます。
+      </p>
+      <p class="note-inline">
+        （この手が使えるのは、答えを主張してくれる prover がいる ZK だからです。
+        MPC と FHE には主張する人がいないので、逆数もソートも本当に計算する必要があり、ずっと高くつきます。）
+      </p>
+    </div>
 
     <div class="callout amber">
       <p class="eyebrow">言い換え — 比較が無いのは、暗号が弱いからではない。強いからだ</p>
@@ -1620,6 +1701,48 @@ f_role   ─┘
     <div class="band-head">
       <p class="eyebrow">お題</p>
       <h2>作るもの — アクセス制御</h2>
+      <p>先に「なぜこの題材なのか」を書きます。適当に選ばれた練習問題ではありません。</p>
+    </div>
+
+    <div class="stack-sm">
+      <h3>なぜアクセス制御なのか</h3>
+      <div class="how">
+        <div>
+          <span class="k">理由 1</span>
+          <span class="t">ZK で最も多いのがこの形</span>
+          <span class="d">
+            「私はこの集合の一員だ」という主張は、実際の ZK アプリの大半を占めます。
+            年齢証明、資格証明、KYC 済みリスト、投票権、Merkle tree の包含証明——
+            <strong>全部メンバーシップ判定</strong>です。最初にやる価値がここにあります。
+          </span>
+        </div>
+        <div>
+          <span class="k">理由 2</span>
+          <span class="t">範囲証明の沼を避けられる</span>
+          <span class="d">
+            「0 以上 8 未満」を回路で書くとビット分解が必要で、いきなり高くつきます。
+            許可リスト方式なら<strong>積 1 本</strong>で済む。Week 1 で本題（アンダー制約）に集中するための設計です。
+          </span>
+        </div>
+        <div>
+          <span class="k">理由 3</span>
+          <span class="t">条件が 3 つあるから比較できる</span>
+          <span class="d">
+            単一条件だと「どの制約がどれだけ効くか」を比べられません。
+            3 つあるから <strong>1 本ずつ外して被害を測れる</strong>し、AND の合成という
+            回路設計の基本動作も自然に必要になります。
+          </span>
+        </div>
+        <div>
+          <span class="k">理由 4</span>
+          <span class="t">全部数え上げられる小ささ</span>
+          <span class="d">
+            512 通りしかないので、健全性を<strong>総当たりで確かめられます</strong>。
+            本物の回路ではこの全探索は不可能で、だからこそ形式検証や証明が要る——
+            という次の話への足がかりにもなっています。
+          </span>
+        </div>
+      </div>
     </div>
     <div class="split">
       <div class="prose">
@@ -1636,6 +1759,28 @@ f_role   ─┘
           この 494 という数字を覚えておくと、下のラボの採点器が出す数字がそのまま
           「どれだけ壊れているか」の目盛りになる。
         </p>
+        <h3>数え方 — 順列でも組み合わせでもない</h3>
+        <p>
+          <code>nPr</code> や <code>nCr</code> は出てきません。使うのは<strong>積の法則</strong>だけです。
+          <strong>3 つの枠が区別されていて、それぞれ独立に選べる</strong>から、単純に掛けます。
+        </p>
+        <p>
+          <strong>順列ではない理由:</strong> 順列は「同じ集合から取り出して並べる」話です。
+          ここは role・clearance・region という<strong>役割の違う 3 つの枠</strong>で、並べ替えという概念がありません。
+          <code>(2, 3, 1)</code> の数字を入れ替えた <code>(3, 2, 1)</code> は「別の並び」ではなく、
+          <b>role = 3 という許可リスト外の別人</b>です。
+        </p>
+        <p>
+          <strong>組み合わせでもない理由:</strong> <code>nCr</code> は順序を区別せずに選ぶ話です。
+          ここでは枠が区別されるので、<b>role の 2 と region の 2 は別物</b>として扱われます。
+        </p>
+        <p>
+          <strong>3・3・2 という数字は、許可リストの要素数がそのまま出てきたもの</strong>です。
+          <code>spec.py</code> に <code>ROLE_OK = (2, 5, 6)</code> と固定で書いてあるから role は 3 通り、
+          <code>REGION_OK = (1, 6)</code> だから region は 2 通り。
+          全候補の 8 も同じで、<code>CODE_MIN = 0</code>／<code>CODE_MAX = 7</code> と決まっているから 8 通りです。
+          <b>数え上げができるのは、リストが固定で公開されているから</b>。
+        </p>
       </div>
       <div class="stack-sm">
         <p class="eyebrow">許可リスト（公開）</p>
@@ -1649,6 +1794,45 @@ authorized := role∈ROLE_OK <span class="k">かつ</span>
         <p class="caption">
           region だけ許可が 2 個しかない。この非対称が、あとで「どこを壊すと一番被害が大きいか」に効いてくる。
         </p>
+        <div class="table-scroll">
+          <table class="data">
+            <thead><tr><th></th><th>role</th><th>clearance</th><th>region</th><th>掛けると</th></tr></thead>
+            <tbody>
+              <tr><td>資格の全候補</td><td>8</td><td>8</td><td>8</td><td>512</td></tr>
+              <tr class="here"><td>正当（authorized）</td><td>3</td><td>3</td><td>2</td><td>18</td></tr>
+              <tr><td>不正（512 − 18）</td><td>—</td><td>—</td><td>—</td><td>494</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">
+          3 桁のダイヤル錠と同じ数え方。1 つ目が 3 通り、2 つ目が 3 通り、3 つ目が 2 通りなら、
+          全部で 3 × 3 × 2 通り。
+        </p>
+
+        <p class="eyebrow">実際に書き出してみる</p>
+<pre><span class="c"># role を 2 に固定すると、残りは 3 × 2 = 6 通り。全部書ける</span>
+(2, 3, 1)  (2, 3, 6)
+(2, 4, 1)  (2, 4, 6)
+(2, 7, 1)  (2, 7, 6)
+
+<span class="c"># role は 2 / 5 / 6 の 3 通りあるので、6 × 3 = 18 通り</span>
+role=2 → 6 通り
+role=5 → 6 通り   ← (5,3,1) (5,3,6) (5,4,1) (5,4,6) (5,7,1) (5,7,6)
+role=6 → 6 通り
+                    合計 18 通り
+
+<span class="c"># 不正になる例。どれか 1 つでも許可リストの外にあれば不正</span>
+(<span class="k">0</span>, 3, 1)  role が外
+(2, <span class="k">0</span>, 1)  clearance が外
+(2, 3, <span class="k">0</span>)  region が外   ← Part B で使う witness
+(<span class="k">0</span>, <span class="k">0</span>, <span class="k">0</span>)  全部外</pre>
+        <p class="caption">
+          <strong>この同じ掛け算が、あとの「実測」の表の数字を全部説明します。</strong>
+          region のリンクを外すと region だけ 8 通りに広がるので 3 × 3 × 8 = 72、そこから正当な 18 を引いて 54。
+          role のリンクを外すと 8 × 3 × 2 = 48 から 18 を引いて 30。
+          <b>被害の大きさは「自由になった枠の選択肢が何倍に増えたか」で決まります</b> ——
+          region は 2 → 8 で 4 倍、role は 3 → 8 で 2.7 倍。だから region を外したときが一番大きい。
+        </p>
       </div>
     </div>
   </div>
@@ -1661,6 +1845,33 @@ authorized := role∈ROLE_OK <span class="k">かつ</span>
       <p class="eyebrow">部品</p>
       <h2>制約を、1 本ずつ数値で読む</h2>
       <p>使う部品は 3 種類だけ。どれも「代入してみれば分かる」ものなので、実際に値を入れて確かめる。</p>
+    </div>
+
+    <div class="callout">
+      <p class="eyebrow">先に —— この 3 つが何の代わりなのか</p>
+      <p class="strong-line">
+        回路には <code>bool</code> 型も <code>in</code> 演算子もありません。だから自分で作ります。
+      </p>
+      <p>
+        <strong>部品① は「真偽値」の自作。</strong> 型が無いので「この信号は 0 か 1」は
+        自分で 1 行書かないと存在しません。<b>ZK 回路でいちばん多く書く制約</b>で、
+        選択子 <code>s·a + (1−s)·b</code> の <code>s</code>、Merkle パスの左右、
+        範囲証明のビット分解——全部この 1 行が土台になります。
+      </p>
+      <p>
+        <strong>部品② は「<code>in</code> 演算子」の自作。</strong> 集合に属することを掛け算だけで表します。
+        そして「私はこの集合の一員だ」は<b>ZK アプリの主役級の主張</b>です
+        （年齢証明・ホワイトリスト・KYC・投票権・Merkle 包含証明）。
+        <b>この積は、その主張を + と × の世界に翻訳する方法そのもの</b>です。
+      </p>
+      <p class="strong-line">
+        そして<b>部品③ が心臓</b>です。① は主張を入れる<b>器</b>、② は事実を表す<b>式</b>。
+        ③ はその 2 つを<b>縛りつける鎖</b>で、Part B で抜けているのがまさにこの 1 本です。
+      </p>
+      <p>
+        ① だけあっても、フラグは値と無関係のまま。② だけあっても、主張と結びついていない。
+        <strong>③ が「1 と主張するなら、リストに入っていろ」を強制して初めて意味が生まれます。</strong>
+      </p>
     </div>
 
     <div class="stack">
