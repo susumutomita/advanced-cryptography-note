@@ -24,6 +24,8 @@
 | Week 2 | [`week2/index.html`](week2/index.html) | MPC — 対話ドリル 2 本（share と線形演算 10 行 / Beaver と GMW 10 行）+ 講義スライド 55 枚と同じ順番のカード列。宿題 8 関数をスライド番号つきで、Beaver・OT・GMW を mod 11・mod 23・1 bit の演習 15 問で |
 | Week 3 | [`week3/index.html`](week3/index.html) | 楕円曲線と Schnorr — 講義スライド 65 枚と同じ順番のカード列。宿題の 10 関数をスライド番号つきで、制約 → 多項式 → 短い証明の 1 歩と ZK 証明を組み立てる 5 手順も |
 | Week 4 | [`week4/index.html`](week4/index.html) | 証明とゼロ知識性（予習） — 対話ドリル 3 本（SumCheck mod 11 / STARK AIR→商→FRI mod 17 / PLONK ゲート表→大積 mod 101、計 41 行）とスライド追従カード 26 枚。嘘の証明者が何回に 1 回すり抜けるかを数える |
+| Week 5 | [`week5/index.html`](week5/index.html) | 完全準同型暗号と TFHE（予習） — 対話ドリル 3 本（LWE とノイズ mod 64 / Bootstrapping の核 mod 64 / negacyclic の表と裏 mod 32、計 31 行）とスライド 51 枚追従カード 47 枚。ノイズが Δ/2 を超えて復号が壊れる瞬間と、同じ符号反転が NAND の仕掛けになるところまで |
+| Week 6 | [`week6/index.html`](week6/index.html) | 理論を応用設計へ（予習） — 対話ドリル 3 本（co-SNARK mod 97 / zkVM の 16 ビットあふれと実行の表 / Tornado Cash の commitment・nullifier・Merkle 所属、計 38 行）とスライド 41 枚追従カード 32 枚。宿題 co-snark-prove / zkvm-exploit の数値そのまま。抜けた制約 1 行で二重引き出しが通る瞬間つき |
 
 ### Week 0（土台編）に入っているもの
 
